@@ -38,5 +38,10 @@ void execute_motor_homing(gcode_command_floats gcode, motorDrive &step_x, motorD
 void execute_motor_enable(gcode_command_floats gcode, motorDrive &step_x, motorDrive &step_turntable, motorDrive &step_z0, motorDrive &step_z1);
 void execute_motor_disable(gcode_command_floats gcode, motorDrive &step_x, motorDrive &step_turntable, motorDrive &step_z0, motorDrive &step_z1);
 void execute_motor_setaccel(gcode_command_floats gcode, motorDrive &step_x, motorDrive &step_turntable, motorDrive &step_z0, motorDrive &step_z1);
+void execute_motor_setvels(gcode_command_floats gcode, motorDrive &step_x, motorDrive &step_turntable, motorDrive &step_z0, motorDrive &step_z1);
+void execute_motor_stepspermm(gcode_command_floats gcode, motorDrive &step_x, motorDrive &step_turntable, motorDrive &step_z0, motorDrive &step_z1);
 void execute_motor_setrunpower(gcode_command_floats gcode, TMCstep &step_x, TMCstep &step_turntable, TMCstep &step_z0, TMCstep &step_z1);
 void execute_motor_setholdpower(gcode_command_floats gcode, TMCstep &step_x, TMCstep &step_turntable, TMCstep &step_z0, TMCstep &step_z1);
+
+/* Other stuff */
+void home_z_axis(motorDrive &step_z0, motorDrive &step_z1);

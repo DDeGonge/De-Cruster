@@ -96,6 +96,12 @@ void loop() {
               execute_motor_disable(gcode, step_x, step_turntable, step_z0, step_z1);
               break;
             }
+            case 92: {
+              // Set axes steps per mm
+              gcode_command_floats gcode(args);
+              execute_motor_stepspermm(gcode, step_x, step_turntable, step_z0, step_z1);
+              break;
+            }
             case 114: {
               // Get current position
               float xpos = step_x.get_current_pos_mm();
@@ -134,11 +140,13 @@ void loop() {
           switch (base_value) 
           {
             case 0: {
-              // configure hardware stuff
+              // configure default velocities
+              gcode_command_floats gcode(args);
+              execute_motor_setaccel(gcode, step_x, step_turntable, step_z0, step_z1);
               break;
             }
             case 1: {
-              // set trigger angle
+              // 
               break;
             }
             case 2: {

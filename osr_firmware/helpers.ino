@@ -65,8 +65,10 @@ void execute_linear_move(gcode_command_floats gcode, motorDrive &step_x, motorDr
   if(gcode.com_exists('y'))
     step_turntable.plan_move(gcode.fetch('y'), gcode.fetch('f'));
   if(gcode.com_exists('z'))
+  {
     step_z0.plan_move(gcode.fetch('z'), gcode.fetch('f'));
     step_z1.plan_move(gcode.fetch('z'), gcode.fetch('f'));
+  }
 
   step_x.execute_move_async();
   step_turntable.execute_move_async();
@@ -93,8 +95,10 @@ void execute_pos_overwrite(gcode_command_floats gcode, motorDrive &step_x, motor
   if(gcode.com_exists('y'))
     step_turntable.set_current_pos_mm(gcode.fetch('y'));
   if(gcode.com_exists('z'))
+  {
     step_z0.set_current_pos_mm(gcode.fetch('z'));
     step_z1.set_current_pos_mm(gcode.fetch('z'));
+  }
   if(!gcode.com_exists('x') && !gcode.com_exists('y') && !gcode.com_exists('z'))
   {
     step_x.set_current_pos_mm(gcode.fetch('x'));
@@ -111,15 +115,64 @@ void execute_motor_homing(gcode_command_floats gcode, motorDrive &step_x, motorD
   if(gcode.com_exists('y'))
     step_turntable.home();
   if(gcode.com_exists('z'))
-    step_z0.home();
-    step_z1.home();
+    home_z_axis(step_z0, step_z1);
   if(!gcode.com_exists('x') && !gcode.com_exists('y') && !gcode.com_exists('z'))
   {
     step_x.home();
     step_turntable.home();
-    step_z0.home();
-    step_z1.home();
+    home_z_axis(step_z0, step_z1);
   }
+}
+
+void home_z_axis(motorDrive &step_z0, motorDrive &step_z1)
+{
+  // This little ball of fun is because I didn't create a dual stepper object. So behold, a janky custom homing routine for Z
+
+  // First home
+  step_z0.plan_move(-300, 1800, true);
+  step_z1.plan_move(-300, 1800, true);
+  step_z0.execute_move_async();
+  step_z1.execute_move_async();
+  while(true)
+  {
+    uint32_t tnow = micros();
+    bool r2 = step_z0.async_move_step_check(tnow, true);
+    bool r3 = step_z1.async_move_step_check(tnow, true);
+    if(r2 && r3)
+      break;
+  }
+  step_z0.zero();
+  step_z1.zero();
+
+  // Bounce a lil
+  step_z0.plan_move(5, 6000);
+  step_z1.plan_move(5, 6000);
+  step_z0.execute_move_async();
+  step_z1.execute_move_async();
+  while(true)
+  {
+    uint32_t tnow = micros();
+    bool r2 = step_z0.async_move_step_check(tnow);
+    bool r3 = step_z1.async_move_step_check(tnow);
+    if(r2 && r3)
+      break;
+  }
+
+  // Final home
+  step_z0.plan_move(-10, 1800, true);
+  step_z1.plan_move(-10, 1800, true);
+  step_z0.execute_move_async();
+  step_z1.execute_move_async();
+  while(true)
+  {
+    uint32_t tnow = micros();
+    bool r2 = step_z0.async_move_step_check(tnow, true);
+    bool r3 = step_z1.async_move_step_check(tnow, true);
+    if(r2 && r3)
+      break;
+  }
+  step_z0.zero();
+  step_z1.zero();
 }
 
 void execute_motor_enable(gcode_command_floats gcode, motorDrive &step_x, motorDrive &step_turntable, motorDrive &step_z0, motorDrive &step_z1)
@@ -129,8 +182,10 @@ void execute_motor_enable(gcode_command_floats gcode, motorDrive &step_x, motorD
   if(gcode.com_exists('y'))
     step_turntable.enable();
   if(gcode.com_exists('z'))
+  {
     step_z0.enable();
     step_z1.enable();
+  }
   if(!gcode.com_exists('x') && !gcode.com_exists('y') && !gcode.com_exists('z'))
   {
     step_x.enable();
@@ -147,8 +202,10 @@ void execute_motor_disable(gcode_command_floats gcode, motorDrive &step_x, motor
   if(gcode.com_exists('y'))
     step_turntable.disable();
   if(gcode.com_exists('z'))
+  {
     step_z0.disable();
     step_z1.disable();
+  }
   if(!gcode.com_exists('x') && !gcode.com_exists('y') && !gcode.com_exists('z'))
   {
     step_x.disable();
@@ -165,8 +222,36 @@ void execute_motor_setaccel(gcode_command_floats gcode, motorDrive &step_x, moto
   if(gcode.com_exists('y'))
     step_turntable.set_default_acc_mmps2(gcode.fetch('y'));
   if(gcode.com_exists('z'))
+  {
     step_z0.set_default_acc_mmps2(gcode.fetch('z'));
     step_z1.set_default_acc_mmps2(gcode.fetch('z'));
+  }
+}
+
+void execute_motor_setvels(gcode_command_floats gcode, motorDrive &step_x, motorDrive &step_turntable, motorDrive &step_z0, motorDrive &step_z1)
+{
+  if(gcode.com_exists('x'))
+    step_x.set_default_vel_mmps(gcode.fetch('x'));
+  if(gcode.com_exists('y'))
+    step_turntable.set_default_vel_mmps(gcode.fetch('y'));
+  if(gcode.com_exists('z'))
+  {
+    step_z0.set_default_vel_mmps(gcode.fetch('z'));
+    step_z1.set_default_vel_mmps(gcode.fetch('z'));
+  }
+}
+
+void execute_motor_stepspermm(gcode_command_floats gcode, motorDrive &step_x, motorDrive &step_turntable, motorDrive &step_z0, motorDrive &step_z1)
+{
+  if(gcode.com_exists('x'))
+    step_x.set_steps_per_mm(gcode.fetch('x'));
+  if(gcode.com_exists('y'))
+    step_turntable.set_steps_per_mm(gcode.fetch('y'));
+  if(gcode.com_exists('z'))
+  {
+    step_z0.set_steps_per_mm(gcode.fetch('z'));
+    step_z1.set_steps_per_mm(gcode.fetch('z'));
+  }
 }
 
 void execute_motor_setrunpower(gcode_command_floats gcode, TMCstep &step_x, TMCstep &step_turntable, TMCstep &step_z0, TMCstep &step_z1)
@@ -176,8 +261,10 @@ void execute_motor_setrunpower(gcode_command_floats gcode, TMCstep &step_x, TMCs
   if(gcode.com_exists('y'))
     step_turntable.set_run_current((int)gcode.fetch('y'));
   if(gcode.com_exists('z'))
+  {
     step_z0.set_run_current((int)gcode.fetch('z'));
     step_z1.set_run_current((int)gcode.fetch('z'));
+  }
 }
 
 void execute_motor_setholdpower(gcode_command_floats gcode, TMCstep &step_x, TMCstep &step_turntable, TMCstep &step_z0, TMCstep &step_z1)
@@ -187,8 +274,10 @@ void execute_motor_setholdpower(gcode_command_floats gcode, TMCstep &step_x, TMC
   if(gcode.com_exists('y'))
     step_turntable.set_hold_current((int)gcode.fetch('y'));
   if(gcode.com_exists('z'))
+  {
     step_z0.set_hold_current((int)gcode.fetch('z'));
     step_z1.set_hold_current((int)gcode.fetch('z'));
+  }
 }
 
 
