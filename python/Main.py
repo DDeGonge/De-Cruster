@@ -26,17 +26,17 @@ def main():
         if cfg.DEBUG_MODE:
             print('Starting...')
         
-        # TODO setup stuff here
-
+        # TODO pre-routine stuff here
+        bot.home()
 
         if args.m == 0:
             decrust_mode(bot, c)
         elif args.m == 1:
-            chop_mode()
+            chop_mode(bot, c)
         elif args.m == 2:
-            dice_mode()
+            dice_mode(bot, c)
         elif args.m == 3:
-            finger_mode()
+            finger_mode(bot, c)
 
                 
     # except Exception as e:
@@ -48,6 +48,18 @@ def main():
     #     c.stop()
     #     bot.disable()
 
+def motors():
+    sd = SerialDevice()
+    bot = BottyMcBotFace(sd)
+
+    bot.home()
+
+    for i in range(100, 500, 50):
+        print(i)
+        bot.absolute_move(x=70, velocity_mmps=i)
+        bot.absolute_move(x=0, velocity_mmps=i)
+
 
 if __name__=='__main__':
     main()
+    # motors()

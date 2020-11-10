@@ -142,7 +142,7 @@ void loop() {
             case 0: {
               // configure default velocities
               gcode_command_floats gcode(args);
-              execute_motor_setaccel(gcode, step_x, step_turntable, step_z0, step_z1);
+              execute_motor_setvels(gcode, step_x, step_turntable, step_z0, step_z1);
               break;
             }
             case 1: {

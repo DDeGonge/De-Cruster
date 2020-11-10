@@ -11,6 +11,10 @@ class BottyMcBotFace(object):
         self.serial_device = serial_device
 
         self.configure_feather()
+
+        self.x_target = 0
+        self.y_target = 0
+        self.z_target = 0
         
 
     """ Motion stuff """
@@ -38,8 +42,13 @@ class BottyMcBotFace(object):
     def home_z(self):
         self.serial_device.command('G28 Z')
 
+    def home(self):
+        self.serial_device.command('G28 Z')
+        self.serial_device.command('G28 X')
+        self.serial_device.command('G92 Y0')
+
     def zero(self):
-        self.serial_device.command('G92 X0 Y0')
+        self.serial_device.command('G92 X0 Y0 Z0')
 
     def enable(self):
         self.serial_device.command('M17')
@@ -47,24 +56,26 @@ class BottyMcBotFace(object):
     def disable(self):
         self.serial_device.command('M84')
 
-    def absolute_move(self, xpos_mm, ypos_mm, zpos_mm, velocity_mmps=None):
+    def absolute_move(self, x = None, y = None, z = None, velocity_mmps=None):
         """ I move da motorz """
         # Send gcode
-        self.x_target = xpos_mm
-        self.y_target = ypos_mm
-        self.z_target = zpos_mm
+        if x is not None:
+            self.x_target = x
+        if y is not None:
+            self.y_target = y
+        if z is not None:
+            self.z_target = z
+
         command = 'G1 X{} Y{} Z{}'.format(self.x_target, self.y_target, self.z_target)
         if velocity_mmps is not None:
             command += ' F{}'.format(velocity_mmps * 60)
+        print(command)
         self.serial_device.command(command)
 
-    def relative_move(self, xpos_mm = 0, ypos_mm = 0, zpos_mm = 0, velocity_mmps = None):
-        self.x_target += xpos_mm
-        self.y_target += ypos_mm
-        self.z_target += zpos_mm
-        self.absolute_move(self.x_target, self.y_target, self.z_target, velocity_mmps)
+    def relative_move(self, x = 0, y = 0, z = 0, velocity_mmps = None):
+        self.absolute_move(self.x_target + x, self.y_target + y, self.z_target + z, velocity_mmps)
 
-    def get_current_pos():
+    def get_current_pos(self):
         """ Returns current position array [x, y, z] """
         ret = self.serial_device.command('M114')
         return [float(i) for i in ret.split(',')]

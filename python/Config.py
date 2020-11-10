@@ -1,7 +1,7 @@
 """ MECHANICAL PARAMETERS """
-x_step_per_mm = 27106
+x_step_per_mm = 320
 y_step_per_mm = 27106  # Actually rads but units psh whatever
-z_step_per_mm = 27106
+z_step_per_mm = 320
 
 x_default_vel_radps = 400
 x_default_accel_radps2 = 5000
@@ -16,26 +16,22 @@ saveimg_path = '/home/pi/imgs'
 
 
 """ CAMERA PARAMETERS """
-video_resolution = (640,480)
+video_resolution = (1920, 1080)
 
 
 """ MOTION DETECT PARAMETERS """
-check_video_fps = 10
-motion_start_min_percent = 0.10
-motion_stop_max_percent = 0.01
-motion_stop_time = 0.5          # Consecutive frames must change by less than motion_stop_max_percent for this much time
+check_video_fps = 3
+motion_start_min_percent = 10
+motion_stop_max_percent = 1
+motion_stop_time = 1          # Consecutive frames must change by less than motion_stop_max_percent for this much time
 
 
-""" FEATHER COMM PARAMETERS """
-# Chars used for setting parameters on feather. All vars here must be int
-Feather_Parameter_Chars = {
-    'a': s0_step_per_rev,
-    'b': s1_step_per_rev,
-    'c': default_vel_radps,
-    'd': default_accel_radps2
-}
+""" OBJECT DETECT PARAMETERS """
+turntable_center = (990, 565)  # Center of rotation of turntable, (0,0) for the math
+pixel_threshold = 40
+pix_per_mm = 6.41
 
 
 """ DEBUG PARAMS """
-DEBUG_MODE = True
+DEBUG_MODE = False
 SAVE_FRAMES = True

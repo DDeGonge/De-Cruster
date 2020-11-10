@@ -129,8 +129,8 @@ void home_z_axis(motorDrive &step_z0, motorDrive &step_z1)
   // This little ball of fun is because I didn't create a dual stepper object. So behold, a janky custom homing routine for Z
 
   // First home
-  step_z0.plan_move(-300, 1800, true);
-  step_z1.plan_move(-300, 1800, true);
+  step_z0.plan_move(-300, 1800, 3000, true);
+  step_z1.plan_move(-300, 1800, 3000, true);
   step_z0.execute_move_async();
   step_z1.execute_move_async();
   while(true)
@@ -159,8 +159,8 @@ void home_z_axis(motorDrive &step_z0, motorDrive &step_z1)
   }
 
   // Final home
-  step_z0.plan_move(-10, 1800, true);
-  step_z1.plan_move(-10, 1800, true);
+  step_z0.plan_move(-10, 1800, 1000, true);
+  step_z1.plan_move(-10, 1800, 1000, true);
   step_z0.execute_move_async();
   step_z1.execute_move_async();
   while(true)

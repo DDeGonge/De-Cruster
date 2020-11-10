@@ -17,16 +17,11 @@ class Camera(object):
         self.resolution = resolution
         self.is_enabled = False
 
-        self.locked_on = False
-        self.tlast = 0
-
         # pic dump stuff
         self.frame_n = 0
         self.pic_type = ''
 
-        # Setup stuff
-        self.tracker = cv2.TrackerKCF_create()
-        self.face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
+        self.empty_scene = None
 
 
     @staticmethod
@@ -60,7 +55,8 @@ class Camera(object):
         _, img = self.cap.read()
         img[:,:,2] = np.zeros([img.shape[0], img.shape[1]])  # Remove red channel so laser can stay on
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        r_gray = cv2.rotate(gray, cv2.ROTATE_90_COUNTERCLOCKWISE)
+        r_gray = gray
+        # r_gray = cv2.rotate(gray, cv2.ROTATE_90_COUNTERCLOCKWISE)
         rblur_gray = cv2.GaussianBlur(r_gray, (21, 21), 0)
 
         if cfg.SAVE_FRAMES:
@@ -69,9 +65,18 @@ class Camera(object):
 
         return rblur_gray
 
+    def save_empty_scene(self):
+        self.empty_scene = self.get_frame()
+
+    def calc_scene_percent_change(self, img1, img2):
+        diff_img = cv2.absdiff(img1, img2)
+        img_shape = np.shape(diff_img)
+        n_pixels = img_shape[0] * img_shape[1]
+        return np.sum(diff_img) / n_pixels
+
     def wait_for_object(self):
         """ Waits until motion is detected then stops """
-        start_frame = get_frame()
+        start_frame = self.get_frame()
         nextframe_time = time.time() + (1 / cfg.check_video_fps)
 
         # Wait for motion start
@@ -82,12 +87,14 @@ class Camera(object):
             nextframe_time += (1 / cfg.check_video_fps)
 
             # Capture frame and compare to start frame
-            next_frame = get_frame()
-            diff_img = cv2.absdiff(next_frame, start_frame)
-            if (np.sum(diff_img)/255) > cfg.motion_start_min_percent:
+            next_frame = self.get_frame()
+            change = self.calc_scene_percent_change(next_frame, start_frame)
+            if cfg.DEBUG_MODE:
+                print(change)
+            if change > cfg.motion_start_min_percent:
                 break
 
-        last_frame = get_frame()
+        last_frame = self.get_frame()
         consecutive_still_frames = 0
 
         # Wait for motion end
@@ -98,29 +105,56 @@ class Camera(object):
             nextframe_time += (1 / cfg.check_video_fps)
 
             # Capture frame and compare to previous frame
-            next_frame = get_frame()
-            diff_img = cv2.absdiff(next_frame, last_frame)
+            next_frame = self.get_frame()
+            change = self.calc_scene_percent_change(next_frame, last_frame)
             last_frame = next_frame
-            if (np.sum(diff_img)/255) > cfg.motion_stop_max_percent:
+            if change > cfg.motion_stop_max_percent:
                 consecutive_still_frames = 0
             else:
                 consecutive_still_frames += 1
 
+            if cfg.DEBUG_MODE:
+                print(consecutive_still_frames, change)
+
             if consecutive_still_frames > (cfg.check_video_fps * cfg.motion_stop_time):
                 break
 
-    def locate_sammy(self):
+    def locate_object(self):
         img = self.get_frame()
-        _, contours, _ = cv2.findContours(img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        diff_img = cv2.absdiff(self.empty_scene, img)
+        _, thresh_img = cv2.threshold(diff_img, cfg.pixel_threshold, 255, cv2.THRESH_BINARY)
+        _, contours, _ = cv2.findContours(thresh_img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         contours_sorted = sorted(contours, key=cv2.contourArea, reverse=True)
+
+        if cfg.DEBUG_MODE:
+            self._save_image(diff_img, 'samich_diff_{}.jpg'.format(self.frame_n))
+            self._save_image(thresh_img, 'samich_thresh_{}.jpg'.format(self.frame_n))
 
         # Convert largest contour to bounding box
         largest_bbox = cv2.minAreaRect(contours_sorted[0])
+
+        # Convert pixel space to mm
+        (x, y) = cfg.turntable_center
+        mult = 1 / cfg.pix_per_mm
+        ((c_x, c_y), (w, h), r) = largest_bbox
+        bbox_mm = ((c_x - x) * mult, (c_y - y) * mult, w * mult, h * mult, r)
+
         if cfg.DEBUG_MODE:
-            print(largest_bbox)
-            # samich = img[y:y+h, x:x+w]
-            # self._save_image(samich, 'samich_{}.jpg'.format(self.frame_n))
-        return 
+            print(bbox_mm)
+
+            # Save bbox area of image
+            width = int(largest_bbox[1][0])
+            height = int(largest_bbox[1][1])
+            box = cv2.boxPoints(largest_bbox)
+            box = np.int0(box)
+            src_pts = box.astype("float32")
+            dst_pts = np.array([[0, height-1], [0, 0], [width-1, 0], [width-1, height-1]], dtype="float32")
+
+            M = cv2.getPerspectiveTransform(src_pts, dst_pts)
+            warped = cv2.warpPerspective(img, M, (width, height))
+            self._save_image(warped, 'samich_{}.jpg'.format(self.frame_n))
+        
+        return bbox_mm
 
 
     def find_face(self):
