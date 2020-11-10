@@ -27,7 +27,7 @@ def main():
             print('Starting...')
         
         # TODO pre-routine stuff here
-        bot.home()
+        # bot.home()
 
         if args.m == 0:
             decrust_mode(bot, c)

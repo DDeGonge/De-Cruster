@@ -32,7 +32,7 @@ void loop() {
   motdrive0.set_run_current(15);
   motdrive0.set_hold_current(6);
 
-  // Set turntable motor currents
+  // Set Z motor currents
   motdrive1.set_run_current(20);
   motdrive1.set_hold_current(6);
   motdrive2.set_run_current(20);

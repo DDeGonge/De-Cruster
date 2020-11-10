@@ -4,6 +4,7 @@ import sys
 import time
 import os
 import cv2
+import math
 from PIL import Image
 import atexit
 import Config as cfg
@@ -137,7 +138,7 @@ class Camera(object):
         (x, y) = cfg.turntable_center
         mult = 1 / cfg.pix_per_mm
         ((c_x, c_y), (w, h), r) = largest_bbox
-        bbox_mm = ((c_x - x) * mult, (c_y - y) * mult, w * mult, h * mult, r)
+        bbox_mm = ((c_x - x) * mult, (c_y - y) * mult, w * mult, h * mult, r * math.pi / 180)
 
         if cfg.DEBUG_MODE:
             print(bbox_mm)
