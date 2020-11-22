@@ -60,6 +60,9 @@ class Camera(object):
         # r_gray = cv2.rotate(gray, cv2.ROTATE_90_COUNTERCLOCKWISE)
         rblur_gray = cv2.GaussianBlur(r_gray, (21, 21), 0)
 
+        # crop width
+        rblur_gray = rblur_gray[:, cfg.crop_w_lower:cfg.crop_w_upper]
+
         if cfg.SAVE_FRAMES:
             self.frame_n += 1
             self._save_image(rblur_gray, '{}.jpg'.format(self.frame_n))
@@ -79,6 +82,7 @@ class Camera(object):
         """ Waits until motion is detected then stops """
         start_frame = self.get_frame()
         nextframe_time = time.time() + (1 / cfg.check_video_fps)
+        consecutive_diff_frames = 0
 
         # Wait for motion start
         while True:
@@ -92,8 +96,14 @@ class Camera(object):
             change = self.calc_scene_percent_change(next_frame, start_frame)
             if cfg.DEBUG_MODE:
                 print(change)
+
             if change > cfg.motion_start_min_percent:
-                break
+                consecutive_diff_frames += 1
+            else:
+            	consecutive_diff_frames = 0
+
+            if consecutive_diff_frames >= 2:
+            	break
 
         last_frame = self.get_frame()
         consecutive_still_frames = 0
@@ -117,7 +127,7 @@ class Camera(object):
             if cfg.DEBUG_MODE:
                 print(consecutive_still_frames, change)
 
-            if consecutive_still_frames > (cfg.check_video_fps * cfg.motion_stop_time):
+            if consecutive_still_frames >= (cfg.check_video_fps * cfg.motion_stop_time) - 1:
                 break
 
     def locate_object(self):
@@ -127,10 +137,6 @@ class Camera(object):
         _, contours, _ = cv2.findContours(thresh_img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         contours_sorted = sorted(contours, key=cv2.contourArea, reverse=True)
 
-        if cfg.DEBUG_MODE:
-            self._save_image(diff_img, 'samich_diff_{}.jpg'.format(self.frame_n))
-            self._save_image(thresh_img, 'samich_thresh_{}.jpg'.format(self.frame_n))
-
         # Convert largest contour to bounding box
         largest_bbox = cv2.minAreaRect(contours_sorted[0])
 
@@ -139,6 +145,13 @@ class Camera(object):
         mult = 1 / cfg.pix_per_mm
         ((c_x, c_y), (w, h), r) = largest_bbox
         bbox_mm = ((c_x - x) * mult, (c_y - y) * mult, w * mult, h * mult, r * math.pi / 180)
+
+        if cfg.DEBUG_MODE:
+            self._save_image(diff_img, 'samich_diff_{}.jpg'.format(self.frame_n))
+            self._save_image(thresh_img, 'samich_thresh_{}.jpg'.format(self.frame_n))
+
+            print(contours_sorted)
+            print('largest bbox: ', largest_bbox)
 
         if cfg.DEBUG_MODE:
             print(bbox_mm)

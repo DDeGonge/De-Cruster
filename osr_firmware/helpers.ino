@@ -63,7 +63,7 @@ void execute_linear_move(gcode_command_floats gcode, motorDrive &step_x, motorDr
   if(gcode.com_exists('x'))
     step_x.plan_move(gcode.fetch('x'), gcode.fetch('f'));
   if(gcode.com_exists('y'))
-    step_turntable.plan_move(gcode.fetch('y'), gcode.fetch('f'));
+    step_turntable.plan_move(gcode.fetch('y'), gcode.fetch('f'), NOVALUE, true);
   if(gcode.com_exists('z'))
   {
     step_z0.plan_move(gcode.fetch('z'), gcode.fetch('f'));
@@ -83,6 +83,7 @@ void execute_linear_move(gcode_command_floats gcode, motorDrive &step_x, motorDr
     bool r1 = step_turntable.async_move_step_check(tnow);
     bool r2 = step_z0.async_move_step_check(tnow);
     bool r3 = step_z1.async_move_step_check(tnow);
+    Serial.println(step_x.get_stall_value());
     if(r0 && r1 && r2 && r3)
       break;
   }

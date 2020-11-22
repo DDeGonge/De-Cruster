@@ -26,17 +26,17 @@ void loop() {
 
   // Set x motor current
   motdrive3.set_run_current(20);
-  motdrive3.set_hold_current(6);
+  motdrive3.set_hold_current(5);
 
   // Set turntable motor current
   motdrive0.set_run_current(15);
-  motdrive0.set_hold_current(6);
+  motdrive0.set_hold_current(5);
 
   // Set Z motor currents
-  motdrive1.set_run_current(20);
-  motdrive1.set_hold_current(6);
-  motdrive2.set_run_current(20);
-  motdrive2.set_hold_current(6);
+  motdrive1.set_run_current(22);
+  motdrive1.set_hold_current(8);
+  motdrive2.set_run_current(22);
+  motdrive2.set_hold_current(8);
 
   // Init vars
   char base_cmd, char_value;
@@ -146,7 +146,7 @@ void loop() {
               break;
             }
             case 1: {
-              // 
+              // configure 
               break;
             }
             case 2: {
