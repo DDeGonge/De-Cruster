@@ -88,14 +88,18 @@ def test_chop():
     bot = BottyMcBotFace(sd)
     bot.home()
 
-    for xtar in range(0, 80, 2):
-        bot.absolute_move(x=xtar)
+    c_pos = 10
+    c_inc = 2
+    while True:
+        bot.absolute_move(x=c_pos)
         bot.chop()
+        c_pos += c_inc
+        c_inc *= 0.8
 
 
 if __name__=='__main__':
-    main()
+    # main()
     # find_center()
-    # test_chop()
+    test_chop()
     # motors()
     # fastmoves()

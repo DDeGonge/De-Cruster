@@ -83,7 +83,7 @@ void execute_linear_move(gcode_command_floats gcode, motorDrive &step_x, motorDr
     bool r1 = step_turntable.async_move_step_check(tnow);
     bool r2 = step_z0.async_move_step_check(tnow);
     bool r3 = step_z1.async_move_step_check(tnow);
-    Serial.println(step_x.get_stall_value());
+//    Serial.println(step_x.get_stall_value());
     if(r0 && r1 && r2 && r3)
       break;
   }
