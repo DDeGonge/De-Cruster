@@ -23,6 +23,7 @@ class Camera(object):
         self.pic_type = ''
 
         self.empty_scene = None
+        self.reddit_template = cv2.imread(cfg.reddit_path,0)
 
 
     @staticmethod
@@ -130,6 +131,33 @@ class Camera(object):
             if consecutive_still_frames >= (cfg.check_video_fps * cfg.motion_stop_time) - 1:
                 break
 
+    def find_first_move(self):
+        start_frame = self.get_frame()
+        nextframe_time = time.time() + (1 / cfg.check_video_fps)
+
+        # Wait for motion start
+        while True:
+            # Wait before capturing next frame
+            while time.time() < nextframe_time:
+                pass
+            nextframe_time += (1 / cfg.check_video_fps)
+
+            # Capture frame and compare to start frame
+            next_frame = self.get_frame()
+            change = self.calc_scene_percent_change(next_frame, start_frame)
+            if cfg.DEBUG_MODE:
+                print(change)
+
+            if change > cfg.motion_start_min_percent:
+                break
+
+        # Find and return where most x change has occured to chop 
+        diff_img = cv2.absdiff(next_frame, start_frame)
+        slice_sums = [sum(diff_img[:,k]) for k in range(len(diff_img))]
+        (x, y) = cfg.turntable_center
+        return (slice_sums.index(max(slice_sums) - x) / cfg.pix_per_mm)
+
+
     def locate_object(self):
         img = self.get_frame()
         diff_img = cv2.absdiff(self.empty_scene, img)
@@ -185,6 +213,15 @@ class Camera(object):
             return (a, b, c, d)
         return None
 
+    def is_reddit_there(self):
+        res = cv.matchTemplate(self.get_frame(), self.reddit_template, method)
+        threshold = 0.8
+        loc = np.where( res >= threshold)
+        print(res)
+        print(len(loc))
+        if len(loc) > 0:
+            return True
+        return False
 
     def show_frame(self, frame):
         (w,h) = self.resolution

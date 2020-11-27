@@ -17,6 +17,7 @@ knife_zero_offset_mm = 70
 
 """ OPERATION PARAMETERS """
 saveimg_path = '/home/pi/imgs'
+reddit_path = 'reddit.png'
 
 
 """ CAMERA PARAMETERS """
@@ -50,8 +51,13 @@ audio_path = 'media'
 audio_catagories = {
     'tea': 'tea',
     'chop': 'chop',
-    'thud': 'thud'
-}
+    'thud': 'thud',
+    'safen': 'safen',
+    'safes': 'safes',
+    'score': 'score',
+    'oops': 'oops',
+    'thank': 'thank'
+}  # I know this dict is useless now but eh it's fine, 'futureproofing' ya?
 freq = 44100
 bitsize = -16
 channels = 2

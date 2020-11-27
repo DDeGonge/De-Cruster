@@ -56,6 +56,21 @@ class Speaker(object):
     def play_thud(self):
         self._play_track('thud')
 
+    def play_safety_start(self):
+        self._play_track('safes')
+
+    def play_safety_end(self):
+        self._play_track('safen')
+
+    def play_scorereq(self):
+        self._play_track('score')
+
+    def play_sarcasm(self):
+        self._play_track('oops')
+
+    def play_thanks(self):
+        self._play_track('thank')
+
 
 if __name__=='__main__':
     s = Speaker()
