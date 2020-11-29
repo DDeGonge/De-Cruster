@@ -24,6 +24,7 @@ class Camera(object):
 
         self.empty_scene = None
         self.reddit_template = cv2.imread(cfg.reddit_path,0)
+        self.reddit_template = cv2.Canny(self.reddit_template, cfg.canny_min, cfg.canny_max)
 
 
     @staticmethod
@@ -155,7 +156,7 @@ class Camera(object):
         diff_img = cv2.absdiff(next_frame, start_frame)
         slice_sums = [sum(diff_img[:,k]) for k in range(len(diff_img))]
         (x, y) = cfg.turntable_center
-        return (slice_sums.index(max(slice_sums) - x) / cfg.pix_per_mm)
+        return (slice_sums.index(max(slice_sums)) - x) / cfg.pix_per_mm
 
 
     def locate_object(self):
@@ -214,12 +215,17 @@ class Camera(object):
         return None
 
     def is_reddit_there(self):
-        res = cv.matchTemplate(self.get_frame(), self.reddit_template, method)
-        threshold = 0.8
-        loc = np.where( res >= threshold)
-        print(res)
-        print(len(loc))
-        if len(loc) > 0:
+        method = cv2.TM_CCOEFF
+        frame_edged = cv2.Canny(self.get_frame(), cfg.canny_min, cfg.canny_max)
+        res = cv2.matchTemplate(frame_edged, self.reddit_template, method)
+        (_, maxVal, _, maxLoc) = cv2.minMaxLoc(res)
+        if cfg.DEBUG_MODE:
+            print(maxVal)
+            # for pt in zip(*loc[::-1]):
+            #     print(pt[0], pt[1])
+
+
+        if maxVal > cfg.template_thresh:
             return True
         return False
 

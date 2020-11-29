@@ -60,13 +60,15 @@ def decrust_mode(bot, c, s, sammy_mode = False, n_pieces = 0):
     s.play_scorereq()
     score = input("Enter score: ")
     s.play_thanks()
-    if score < 10:
+    if int(score) < 10:
+        bot.home()
         while True:
             xloc = c.find_first_move() + cfg.knife_zero_offset_mm
             bot.absolute_move(x=xloc)
             bot.chop()
             s.play_sarcasm()
-            bot.absolute_move(x=0, z=0)
+            bot.absolute_move(z=0)
+            bot.absolute_move(x=0)
 
 
 def chop_mode(bot, c, s, width_mm):
@@ -139,13 +141,17 @@ def dice_mode(bot, c, s, width_mm):
         bot.chop()
         c_pos += width_mm
 
-def safety_mode(bot, c, s, width_mm):
+def safety_mode(bot, c, s):
     s.play_safety_start()
 
     while True:
         # Enter reddit patrol loop
         if c.is_reddit_there():
             bot.absolute_move(x=60)
+            bot.absolute_move(z=80)
             bot.absolute_move(z=60)
+            bot.absolute_move(z=80)
+            bot.absolute_move(z=0)
             s.play_safety_end()
             s.wait_for_sound_to_end()
+            return

@@ -12,7 +12,7 @@ from Modes import *
 
 def main():
     parser = argparse.ArgumentParser(description='HOLY HECK I made a robot that chops stuff.')
-    parser.add_argument('-m', type=int, default=0, help='Operational Mode - 0: De-Crust, 1: Chop, 2: Dice, 3: Finger Sammy')
+    parser.add_argument('-m', type=int, default=0, help='Operational Mode - 0: De-Crust, 1: Chop, 2: Dice, 3: Finger Sammy, 4: Safety Keyboard')
     parser.add_argument('-n', type=int, default=8, help='Number of finger sammys to cut. Must be even')
     parser.add_argument('-w', type=float, default=3, help='Slicing thickness in mm')
     args = parser.parse_args()
@@ -39,6 +39,8 @@ def main():
         dice_mode(bot, c, s, args.w)
     elif args.m == 3:
         decrust_mode(bot, c, s, sammy_mode=True, n_pieces=args.n)
+    elif args.m == 4:
+        safety_mode(bot, c, s)
 
     bot.home()
 
@@ -98,8 +100,8 @@ def test_chop():
 
 
 if __name__=='__main__':
-    # main()
+    main()
     # find_center()
-    test_chop()
+    # test_chop()
     # motors()
     # fastmoves()

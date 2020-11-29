@@ -61,9 +61,10 @@ class BottyMcBotFace(object):
         self.absolute_move(z=cfg.z_table_offset_mm - cfg.z_clear_food_mm, velocity_mmps=300)
 
     def bread_cut(self):
-        self.absolute_move(z=cfg.z_table_offset_mm, velocity_mmps=150)
+        self.absolute_move(z=cfg.z_table_offset_mm, velocity_mmps=50)
         self.absolute_move(z=cfg.z_table_offset_mm - cfg.z_clear_food_mm, velocity_mmps=200)
-        self.absolute_move(z=cfg.z_table_offset_mm, velocity_mmps=150)
+        self.absolute_move(z=cfg.z_table_offset_mm, velocity_mmps=50)
+        time.sleep(0.3)
         self.absolute_move(z=cfg.z_table_offset_mm - cfg.z_clear_food_mm, velocity_mmps=200)
 
     def absolute_move(self, x = None, y = None, z = None, velocity_mmps=None):

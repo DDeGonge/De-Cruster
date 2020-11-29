@@ -7,17 +7,17 @@ x_default_vel_radps = 400
 x_default_accel_radps2 = 10000
 y_default_vel_radps = 3
 y_default_accel_radps2 = 5
-z_default_vel_radps = 300
-z_default_accel_radps2 = 4000
+z_default_vel_radps = 250
+z_default_accel_radps2 = 3000
 
-z_table_offset_mm = 115
-z_clear_food_mm = 30
+z_table_offset_mm = 118
+z_clear_food_mm = 35
 knife_zero_offset_mm = 70
 
 
 """ OPERATION PARAMETERS """
 saveimg_path = '/home/pi/imgs'
-reddit_path = 'reddit.png'
+reddit_path = 'media/reddit.png'
 
 
 """ CAMERA PARAMETERS """
@@ -37,6 +37,9 @@ pixel_threshold = 20
 pix_per_mm = 6.80
 crop_w_lower = 400
 crop_w_upper = 1600
+canny_min = 10
+canny_max = 30
+template_thresh = 5000000
 
 
 """ CHOPPING PARAMETERS """
